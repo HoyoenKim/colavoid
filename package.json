@@ -1,8 +1,8 @@
 {
   "name": "colavoid",
   "version": "0.0.1",
-  "description": "A Quasar Framework app",
-  "productName": "Quasar App",
+  "description": "Collision Avoidance Alert App",
+  "productName": "Softbeep",
   "author": "HoyeonKim <hoyoen@autocrypt.io>",
   "private": true,
   "scripts": {
@@ -11,6 +11,7 @@
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
+    "@fawmi/vue-google-maps": "^0.9.79",
     "@quasar/extras": "^1.0.0",
     "@quasar/quasar-ui-qoverlay": "^2.0.1",
     "core-js": "^3.6.5",
@@ -21,6 +22,7 @@
   "devDependencies": {
     "@babel/eslint-parser": "^7.13.14",
     "@quasar/app": "^3.0.0",
+    "@quasar/quasar-app-extension-qoverlay": "^2.0.1",
     "electron": "^19.0.9",
     "eslint": "^7.14.0",
     "eslint-config-prettier": "^8.1.0",

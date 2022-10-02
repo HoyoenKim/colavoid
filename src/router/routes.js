@@ -4,6 +4,11 @@ const routes = [
     component: () => import("layouts/MainLayout.vue"),
     children: [{ path: "", component: () => import("pages/alarm.vue") }],
   },
+  {
+    path: "/map",
+    component: () => import("layouts/MainLayout.vue"),
+    children: [{ path: "", component: () => import("pages/mapdata.vue") }],
+  },
 
   // Always leave this as last one,
   // but you can also remove it
