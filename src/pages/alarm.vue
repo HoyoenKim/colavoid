@@ -1,9 +1,10 @@
 <template>
   <q-page>
     <div class="col">
-      <div :class="alertState">
+      <div class="q-pt-xl row flex-center">
         <div style="border: 1px solid rgba(86, 61, 124, 0.2)">
-          <div class="text-center text-bold">Collision Alert</div>
+          <div class="text-center text-bold q-pt-sm">Collision Alert</div>
+          <div :class="alertState">
           <q-overlay background-color="#FFFFFF" v-model="model">
             <template v-slot:body>
               <div style="height: 50px"></div>
@@ -36,6 +37,7 @@
               class="q-ma-md"
             />
           </q-overlay>
+          </div>
         </div>
       </div>
     </div>
@@ -63,27 +65,48 @@
         </div>
       </div>
     </q-expansion-item>
+    {{detect_result}}
   </q-page>
 </template>
 
 <script>
 import { ref, defineComponent, onMounted, computed } from "vue";
+import { api } from 'boot/axios';
 
 export default defineComponent({
   name: "alarm",
   setup() {
     let timer;
+    let timer_blink;
     var alertFlag = ref(false);
     var doAlert = ref(false);
+    var detect_result = ref({});
     onMounted(() => {
-      //clearInterval(timer);
-      //timer = setInterval(() => {
-      //  if (doAlert.value) {
-      //    alertFlag.value = !alertFlag.value;
-      //  } else {
-      //    alertFlag.value = false;
-      //  }
-      //}, 300);
+      clearInterval(timer);
+      timer = setInterval(() => {
+        api.get('/api/backend')
+        .then((response) => {
+          console.log(response.data)
+          detect_result.value = response.data
+          if(response.data.detect_result.length == 0) {
+            alertFlag.value = false;
+          }
+          else {
+            alertFlag.value = true;
+          }
+        })
+        .catch(() => {
+          console.log('Error exists')
+        })
+      }, 1000);
+
+      timer_blink = setInterval(() => {
+        if (doAlert.value) {
+          alertFlag.value = !alertFlag.value;
+        } else {
+          alertFlag.value = false;
+        }
+      }, 300);
       //window.api.receive("s", (data) => {
       //  if (data.slice(-1) == "1") {
       //    doAlert.value = false;
@@ -102,13 +125,14 @@ export default defineComponent({
       model: ref(true),
       alertState: computed(() => {
         if (alertFlag.value) {
-          return "q-pt-xl row flex-center bg-red";
+          return "bg-red";
         } else {
-          return "q-pt-xl row flex-center";
+          return "";
         }
       }),
       doAlert: doAlert,
-      expanded: ref(false)
+      expanded: ref(false),
+      detect_result
     };
   },
 });
