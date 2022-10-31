@@ -66,23 +66,100 @@
       </div>
     </q-expansion-item>
     {{detect_result}}
+    {{vs}}
   </q-page>
 </template>
 
 <script>
 import { ref, defineComponent, onMounted, computed } from "vue";
-import { api } from 'boot/axios';
+import { api, api2 } from 'boot/axios';
 
 export default defineComponent({
   name: "alarm",
   setup() {
     let timer;
+    let timer_angle;
     let timer_blink;
     var alertFlag = ref(false);
     var doAlert = ref(false);
     var detect_result = ref({});
+    var vs = ref('None');
+    var angle = ref(20);
+    var value = ref(10);
+    function area(roi) {
+      return Math.abs(roi[2] - roi[0])*Math.abs(roi[3] - roi[1])
+    }
+    function checkAlert() {
+      var ret = true;
+      if(vs.value == 'None') {
+        ret = false;
+      }
+      else if(vs.value == 'lt') {
+        if(detect_result.value["summary"].includes('car')) {
+          var ret_list = detect_result.value["detect_result"];
+          for (var i = 0 ; i < ret_list.length ; i++) {
+            if(ret_list[i][4] > 0.6) {
+              if(area(ret_list[i]) < 2000) {
+                ret = false;
+              }
+            }
+          }
+        }
+        else {
+          ret = false;
+        }
+      }
+      else if(vs.value == 'lb') {
+        if(detect_result.value["summary"].includes('car')) {
+          var ret_list = detect_result.value["detect_result"];
+          for (var i = 0 ; i < ret_list.length ; i++) {
+            if(ret_list[i][4] > 0.6) {
+              if(area(ret_list[i]) < 2000) {
+                ret = false;
+              }
+            }
+          }
+        }
+        else {
+          ret = false;
+        }
+
+      }
+      else if(vs.value == 'rt') {
+        if(detect_result.value["summary"].includes('person')) {
+          var ret_list = detect_result.value["detect_result"];
+          for (var i = 0 ; i < ret_list.length ; i++) {
+            if(ret_list[i][4] < 0.3) {
+                ret = false;
+            }
+          }
+        }
+        else {
+          ret = false;
+        }
+      }
+      else if(vs.value == 'rb') {
+        if(detect_result.value["summary"].includes('car')) {
+          var ret_list = detect_result.value["detect_result"];
+          for (var i = 0 ; i < ret_list.length ; i++) {
+            if(ret_list[i][4] > 0.6) {
+              if(area(ret_list[i]) < 2000) {
+                ret = false;
+              }
+            }
+          }
+        }
+        else {
+          ret = false;
+        }
+
+      }
+      return ret;
+    }
     onMounted(() => {
       clearInterval(timer);
+      clearInterval(timer_angle);
+      clearInterval(timer_blink);
       timer = setInterval(() => {
         api.get('/api/backend')
         .then((response) => {
@@ -92,7 +169,8 @@ export default defineComponent({
             alertFlag.value = false;
           }
           else {
-            alertFlag.value = true;
+            //alertFlag.value = true;
+            alertFlag.value = checkAlert();
           }
         })
         .catch(() => {
@@ -100,13 +178,40 @@ export default defineComponent({
         })
       }, 1000);
 
+      timer_angle = setInterval(() => {
+        api2.get("/videoreq/now")
+        .then((response) => {
+          //console.log(response.data);
+          vs.value = response.data;
+          if(vs.value == 'None') {
+            angle.value = 20
+          }
+          else if (vs.value == 'lt') {
+            angle.value = 330
+          }
+          else if (vs.value == 'lb') {
+            angle.value = 240
+          }
+          else if (vs.value == 'rt') {
+            angle.value = 70
+          }
+          else if (vs.value == 'rb') {
+            angle.value = 150
+          }
+
+        })
+        .catch(() => {
+          console.log("Error exists");
+        });
+      }, 100)
+
       timer_blink = setInterval(() => {
         if (doAlert.value) {
           alertFlag.value = !alertFlag.value;
         } else {
           alertFlag.value = false;
         }
-      }, 300);
+      }, 500);
       //window.api.receive("s", (data) => {
       //  if (data.slice(-1) == "1") {
       //    doAlert.value = false;
@@ -120,8 +225,8 @@ export default defineComponent({
       //});
     });
     return {
-      angle: ref(20),
-      value: ref(10),
+      angle: angle,
+      value: value,
       model: ref(true),
       alertState: computed(() => {
         if (alertFlag.value) {
@@ -132,7 +237,8 @@ export default defineComponent({
       }),
       doAlert: doAlert,
       expanded: ref(false),
-      detect_result
+      detect_result,
+      vs: vs
     };
   },
 });

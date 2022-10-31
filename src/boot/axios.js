@@ -3,7 +3,8 @@ import axios from 'axios'
 
 //const api = axios.create({ baseURL: 'http://localhost:3000/' })
 //const api = axios.create({ baseURL: 'http://192.168.0.101:3000/' })
-const api = axios.create({ baseURL: 'http://192.168.230.201:3000/' })
+const api = axios.create({ baseURL: 'http://192.168.246.201:3001/' })
+const api2 = axios.create({ baseURL: 'http://192.168.246.12:3000/' })
 
 export default boot(({ app }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
@@ -17,4 +18,4 @@ export default boot(({ app }) => {
   //       so you can easily perform requests against your app's API
 })
 
-export { axios, api }
+export { axios, api, api2 }
